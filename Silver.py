@@ -70,6 +70,10 @@ def main():
 
                         square_selected = ()
                         player_clicks = []
+                
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_BACKSPACE:
+                        gamestate.undo_move()
 
             load_gamestate(screen, gamestate)
             clock.tick(MAX_FPS)

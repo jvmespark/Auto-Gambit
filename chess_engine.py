@@ -23,6 +23,13 @@ class gamestate():
         
         self.white_move = not self.white_move
 
+    def undo_move(self):
+        if len(self.move_log) != 0:
+            last_move = self.move_log.pop()
+            self.board[last_move.start_square_row][last_move.start_square_column] = last_move.piece_moved
+            self.board[last_move.end_square_row][last_move.end_square_column] = last_move.piece_captured
+            self.white_move = not self.white_move
+
 class move():
     #map key values 
     row_ranks = {"1" : 7, "2" : 6, "3" : 5, "4" : 4, "5" : 3, "6" : 2, "7" : 1, "8" : 0}
