@@ -39,6 +39,11 @@ def main():
     gamestate = engine.gamestate()
     load_images()
 
+    #tuple
+    square_selected = ()
+    #array
+    player_clicks = []
+
     running = True
     while (running):
             for event in pygame.event.get():
@@ -49,9 +54,23 @@ def main():
                     #-Move the piece to the next clicked spot IF the spot is empty --
                     #-deselect the piece if the player clicks the same piece again
                     mouse_location = pygame.mouse.get_pos()
-                    column = mouse_location[0] // PIECE_SIZE
-                    row = mouse_location[1] // PIECE_SIZE
-                    
+                    column = int(mouse_location[0] // PIECE_SIZE)
+                    row = int(mouse_location[1] // PIECE_SIZE)
+
+                    if  square_selected == (row, column):
+                        square_selected = ()
+                        player_clicks = []
+                    else:
+                        square_selected = (row, column)
+                        player_clicks.append(square_selected)
+                    if len(player_clicks) == 2:
+                        move = engine.move(player_clicks[0], player_clicks[1], gamestate.board)
+                        print(move.get_chess_notation())
+                        gamestate.make_move(move)
+
+                        square_selected = ()
+                        player_clicks = []
+
             load_gamestate(screen, gamestate)
             clock.tick(MAX_FPS)
             pygame.display.flip()
