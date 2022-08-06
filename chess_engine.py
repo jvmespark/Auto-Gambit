@@ -30,6 +30,53 @@ class gamestate():
             self.board[last_move.end_square_row][last_move.end_square_column] = last_move.piece_captured
             self.white_move = not self.white_move
 
+    def get_valid_moves(self):
+        #filters moves
+        valid_moves = []
+        bool king_is_safe = True
+        get_all_possible_moves()
+        #make move
+        #generate opp moves
+        #see if moves attacks king
+        #king safe = valid = add to list
+        #return list of valid moves only
+
+    def get_all_possible_moves(self):
+        moves = []
+        for r in range(self.board):
+            for c in range(self.board[r]):
+                if board[r][c] != '--':
+                    piece = board[r][c]
+                    color = piece[0]
+                    character = piece[1]
+
+                    if piece == 'p':
+                        self.get_pawn_moves(r, c, moves)
+                    elif piece == 'r':
+                        self.get_rook_moves(r, c, moves)
+                    elif piece == 'b':    
+                        self.get_bishop_moves(r, c, moves)
+                    elif piece == 'q':    
+                        self.get_queen_moves(r, c, moves)
+                    elif piece == 'n':    
+                        self.get_knight_moves(r, c, moves)
+                    elif piece == 'k':
+                        self.get_king_moves(r, c, moves)
+    return moves    
+
+    def get_pawn_moves(self, r, c, moves):
+        pass    
+    def get_rook_moves(self, r, c, moves):
+        pass
+    def get_bishop_moves(self, r, c, moves):
+        pass
+    def get_queen_moves(self, r, c, moves):
+        pass
+    def get_knight_moves(self, r, c, moves):
+        pass
+    def get_king_moves(self, r, c, moves):
+        pass
+
 class move():
     #map key values 
     row_ranks = {"1" : 7, "2" : 6, "3" : 5, "4" : 4, "5" : 3, "6" : 2, "7" : 1, "8" : 0}

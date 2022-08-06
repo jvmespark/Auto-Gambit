@@ -37,6 +37,8 @@ def main():
     pygame.display.set_caption("PyChess")
     
     gamestate = engine.gamestate()
+    valid_moves = gamestate.get_valid_moves()
+    moveMade = False #until a valid move is made, then you shouldnt regenerate an expensive function like get valid moves
     load_images()
 
     #tuple
@@ -66,14 +68,21 @@ def main():
                     if len(player_clicks) == 2:
                         move = engine.move(player_clicks[0], player_clicks[1], gamestate.board)
                         print(move.get_chess_notation())
-                        gamestate.make_move(move)
+                        if move in valid_moves:
+                            gamestate.make_move(move)
+                            moveMade = True
 
                         square_selected = ()
                         player_clicks = []
                 
                 elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_BACKSPACE:
+                    if event.key == pygame.K_BACKSPACE or event.key == pygame.K_u:
                         gamestate.undo_move()
+                        valid_moves = gamestate.get_valid_moves()
+
+            if moveMade:
+                valid_moves = gamestate.get_valid_moves()
+                moveMade = False
 
             load_gamestate(screen, gamestate)
             clock.tick(MAX_FPS)
