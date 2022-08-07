@@ -73,11 +73,61 @@ class gamestate():
                     moves.append(move((r,c),(r+1,c+1),self.board))
 
     def get_rook_moves(self, r, c, moves):
-        pass 
-    def get_bishop_moves(self, r, c, moves):
-        pass
+        #something is bugged in here
+        #ill try again later
+        print("made it to rook")
+        r_place = r
+        c_place = c
+        if self.white_move:
+            print("made it to white")
+            for x in reversed(range(r_place)):
+                if self.board[x][c][0] == 'b' or self.board[x][c][0] == 'w':
+                    break
+                if self.board[x][c][0] == '--':
+                    print("appended x")
+                    moves.append(move((r,c),(x,c),self.board))
+            for x2 in range(7 - r_place):
+                if self.board[x2][c][0] == 'b' or self.board[x2][c][0] == 'w':
+                    break
+                if self.board[x2][c][0]=='--':
+                    print("appended x2")
+                    moves.append(move((r,c),(x2,c),self.board))
+            print("made it to reversed y")
+            for y in reversed(range(c_place)):
+                print("inside reversed")
+                print(r)
+                print(y)
+                if self.board[r][y][0] == '--':# or self.board[r][y][0] == 'w':
+                    print("inside break")
+                    #break
+                elif self.board[r][y][0]=='--':
+                    print("appended y")
+                    moves.append(move((r,c),(r,y),self.board))
+                    print(r)
+                    print(y)
+            for y2 in range(7-c_place):
+                if self.board[r][y2][0]=='b' or self.board[r][y2][0]=='w':
+                    break
+                if self.board[r][y2][0]=='--':
+                    print("appended y2")
+                    moves.append(move((r,c),(r,y2),self.board))
+            
+        #every spot open to its:
+            #left
+            #right
+            #up
+            #down
+        #no diagonals
+            #has to stop at the first taken spot closest to the piece both left and right
+            #cant do regular loop bc then u can slide the rook through a piece
+
     def get_queen_moves(self, r, c, moves):
-        pass
+        #moves the same as a bishop and a rook. so does this work?
+        self.move_functions["b"](r, c, moves)
+        self.move_functions["r"](r, c, moves)
+
+    def get_bishop_moves(self, r, c, moves):
+        pass 
     def get_knight_moves(self, r, c, moves):
         if self.white_move:        
             #up 2 left 1 x
