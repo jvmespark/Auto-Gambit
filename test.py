@@ -1,5 +1,6 @@
-print(1)
+x = 0
+y = 0
 
-for x in reversed(range(0, 2)):
-    print(x)
-
+for x, y in zip(range(5), range(5)):
+        print(x)
+        print(y)
