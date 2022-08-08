@@ -127,34 +127,34 @@ class gamestate():
 
         if not self.white_move:
             for y in reversed(range(r)):
-                if self.board[y][c][0] == 'b':
+                if self.board[y][c][0] == 'w':
                     moves.append(move((r,c),(y,c),self.board))
                     break
-                if self.board[y][c][0] == 'w':
+                if self.board[y][c][0] == 'b':
                     break
                 if self.board[y][c] == '--':
                     moves.append(move((r,c),(y,c),self.board))
             for y2 in range(r + 1, 8):
-                if self.board[y2][c][0] == 'b':
+                if self.board[y2][c][0] == 'w':
                     moves.append(move((r,c),(y2,c),self.board))
                     break 
-                if self.board[y2][c][0] == 'w':
+                if self.board[y2][c][0] == 'b':
                     break
                 if self.board[y2][c]=='--':
                     moves.append(move((r,c),(y2,c),self.board))
             for x in reversed(range(c)):
-                if self.board[r][x][0] == '--':
+                if self.board[r][x][0] == 'w':
                     moves.append(move((r,c),(r,x),self.board))
                     break
-                if self.board[r][x][0] == 'w':
+                if self.board[r][x][0] == 'b':
                     break
                 if self.board[r][x]=='--':
                     moves.append(move((r,c),(r,x),self.board))
             for x2 in range(c + 1, 8):
-                if self.board[r][x2][0]=='b':
+                if self.board[r][x2][0]=='w':
                     moves.append(move((r,c),(r,x2),self.board))
                     break 
-                if self.board[r][x2][0] == 'w':
+                if self.board[r][x2][0] == 'b':
                     break
                 if self.board[r][x2]=='--':
                     moves.append(move((r,c),(r,x2),self.board))
@@ -175,39 +175,86 @@ class gamestate():
 
         if self.white_move:
             #left up
-            for x, y in zip(reversed(range(c)), reversed(range(0, r - 1))):
-                if self.board[y][x][0]=='b' or self.board[y][x][0]=='w':
+            for x, y in zip(reversed(range(c)), reversed(range(r))):
+                if self.board[y][x][0]=='b':
                     moves.append(move((r,c),(y,x),self.board))
+                    break
+                if self.board[y][x][0] == 'w':
                     break
                 if self.board[y][x]=='--':
                     moves.append(move((r,c),(y,x),self.board))
 
            #right up
-            for x2, y2 in zip(range(c, 8), reversed(range(0, r - 1))):
-                if self.board[y2][x2][0]=='b' or self.board[y2][x2][0]=='w':
+            for x2, y2 in zip(range(c + 1, 8), reversed(range(r))):
+                if self.board[y2][x2][0]=='b':
                     moves.append(move((r,c),(y2,x2),self.board))
+                    break
+                if self.board[y2][x2][0] == 'w':
                     break
                 if self.board[y2][x2]=='--':
                     moves.append(move((r,c),(y2,x2),self.board))
 
            #left down
-            for x3, y3 in zip(reversed(range(c)), range(r, 8)):
-                if self.board[y3][x3][0]=='b' or self.board[y3][x3][0]=='w':
+            for x3, y3 in zip(reversed(range(c)), range(r + 1, 8)):
+                if self.board[y3][x3][0]=='b':
                     moves.append(move((r,c),(y3,x3),self.board))
+                    break
+                if self.board[y3][x3][0]=='w':
                     break
                 if self.board[y3][x3]=='--':
                     moves.append(move((r,c),(y3,x3),self.board))
 
            #right down
-            for x4, y4 in zip(range(c, 8), range(r, 8)):
-                if self.board[y4][x4][0]=='b' or self.board[y4][x4][0]=='w':
+            for x4, y4 in zip(range(c + 1, 8), range(r + 1, 8)):
+                if self.board[y4][x4][0]=='b':
                     moves.append(move((r,c),(y4,x4),self.board))
+                    break
+                if self.board[y4][x4][0]=='w':
                     break
                 if self.board[y4][x4]=='--':
                     moves.append(move((r,c),(y4,x4),self.board))
 
         if not self.white_move:
-            pass
+            #left down
+            for x, y in zip(reversed(range(c)), range(r + 1, 8)):
+                if self.board[y][x][0]=='w':
+                    moves.append(move((r,c),(y,x),self.board))
+                    break
+                if self.board[y][x][0] == 'b':
+                    break
+                if self.board[y][x]=='--':
+                    moves.append(move((r,c),(y,x),self.board))
+
+           #right down
+            for x2, y2 in zip(range(c + 1, 8), range(r + 1, 8)):
+                if self.board[y2][x2][0]=='w':
+                    moves.append(move((r,c),(y2,x2),self.board))
+                    break
+                if self.board[y2][x2][0] == 'b':
+                    break
+                if self.board[y2][x2]=='--':
+                    moves.append(move((r,c),(y2,x2),self.board))
+
+           #left up
+            for x3, y3 in zip(reversed(range(c)), reversed(range(r))):
+                if self.board[y3][x3][0]=='w':
+                    moves.append(move((r,c),(y3,x3),self.board))
+                    break
+                if self.board[y3][x3][0]=='b':
+                    break
+                if self.board[y3][x3]=='--':
+                    moves.append(move((r,c),(y3,x3),self.board))
+
+           #right up
+            for x4, y4 in zip(range(c + 1, 8), reversed(range(r))):
+                if self.board[y4][x4][0]=='w':
+                    moves.append(move((r,c),(y4,x4),self.board))
+                    break
+                if self.board[y4][x4][0]=='b':
+                    break
+                if self.board[y4][x4]=='--':
+                    moves.append(move((r,c),(y4,x4),self.board))
+
     def get_knight_moves(self, r, c, moves):
         if self.white_move:        
             #up 2 left 1 x
@@ -219,6 +266,7 @@ class gamestate():
             #right 2 up 1 x
             #right 2 down 1
 
+            #right 1
             if c + 1 < 7:
                 if r-2>=0:
                     if self.board[r-2][c+1]=='--' or self.board[r-2][c+1][0]=='b':
@@ -226,7 +274,7 @@ class gamestate():
                 if r+2 < len(self.board[0]):
                     if self.board[r+2][c+1]=='--' or self.board[r-2][c+1][0]=='b':
                         moves.append(move((r,c),(r+2,c+1),self.board))
-                    
+            #left 1        
             if c - 1 >= 0:
                 if r-2>=0:
                     if self.board[r-2][c-1]=='--' or self.board[r-2][c-1][0]=='b':
@@ -234,6 +282,7 @@ class gamestate():
                 if r+2 < len(self.board[0]):
                     if self.board[r+2][c-1]=='--' or self.board[r-2][c-1][0]=='b':
                         moves.append(move((r,c),(r+2,c-1),self.board))
+            #right 2
             if c + 2 < 7:
                 if r-1>=0:
                     if self.board[r-1][c+2]=='--' or self.board[r-1][c+2][0]=='b':
@@ -241,6 +290,7 @@ class gamestate():
                 if r+1 < len(self.board[0]):
                     if self.board[r+1][c+2]=='--' or self.board[r+1][c+2][0]=='b':
                         moves.append(move((r,c),(r+1,c+2),self.board))
+            #left 2
             if c - 2 >= 0:
                 if r-1>=0:
                     if self.board[r-1][c-2]=='--' or self.board[r-1][c-2][0]=='b':
@@ -248,35 +298,38 @@ class gamestate():
                 if r+1 < len(self.board[0]):
                     if self.board[r+1][c-2]=='--' or self.board[r+1][c-2][0]=='b':
                         moves.append(move((r,c),(r+1,c-2),self.board))
-        if not self.white_move:        
+        if not self.white_move:    
+            #right 1
             if c + 1 < 7:
-                if r-2 < len(self.board[0]):
-                    if self.board[r-2][c+1]=='--' or self.board[r-2][c+1][0]=='b':
+                if r-2 >= 0:
+                    if self.board[r-2][c+1]=='--' or self.board[r-2][c+1][0]=='w':
                         moves.append(move((r,c),(r-2,c+1),self.board))
-                if r+2 >= 0:
-                    if self.board[r+2][c+1]=='--' or self.board[r-2][c+1][0]=='b':
+                if r+2 < len(self.board[0]):
+                    if self.board[r+2][c+1]=='--' or self.board[r-2][c+1][0]=='w':
                         moves.append(move((r,c),(r+2,c+1),self.board))
-                    
+            #left 1         
             if c - 1 >= 0:
-                if r-2 < len(self.board[0]):
-                    if self.board[r-2][c-1]=='--' or self.board[r-2][c-1][0]=='b':
-                        moves.append(move((r,c),(r-1,c-1),self.board))
-                if r+2 >= 0:
-                    if self.board[r+2][c-1]=='--' or self.board[r-2][c-1][0]=='b':
+                if r-2 >= 0:
+                    if self.board[r-2][c-1]=='--' or self.board[r-2][c-1][0]=='w':
+                        moves.append(move((r,c),(r-2,c-1),self.board))
+                if r+2 < len(self.board[0]):
+                    if self.board[r+2][c-1]=='--' or self.board[r+2][c-1][0]=='w':
                         moves.append(move((r,c),(r+2,c-1),self.board))
+            #right 2
             if c + 2 < 7:
-                if r-1 < len(self.board[0]):
-                    if self.board[r-1][c+2]=='--' or self.board[r-1][c+2][0]=='b':
+                if r-1 >= 0:
+                    if self.board[r-1][c+2]=='--' or self.board[r-1][c+2][0]=='w':
                         moves.append(move((r,c),(r-1,c+2),self.board))
-                if r+1 >= 0:
-                    if self.board[r+1][c+2]=='--' or self.board[r+1][c+2][0]=='b':
+                if r+1 < len(self.board[0]):
+                    if self.board[r+1][c+2]=='--' or self.board[r+1][c+2][0]=='w':
                         moves.append(move((r,c),(r+1,c+2),self.board))
+            #left 2
             if c - 2 >= 0:
-                if r-1 < len(self.board[0]):
-                    if self.board[r-1][c-2]=='--' or self.board[r-1][c-2][0]=='b':
+                if r-1 >= 0:
+                    if self.board[r-1][c-2]=='--' or self.board[r-1][c-2][0]=='w':
                         moves.append(move((r,c),(r-1,c-2),self.board))
-                if r+1 >= 0:
-                    if self.board[r+1][c-2]=='--' or self.board[r+1][c-2][0]=='b':
+                if r+1 < len(self.board[0]):
+                    if self.board[r+1][c-2]=='--' or self.board[r+1][c-2][0]=='w':
                         moves.append(move((r,c),(r+1,c-2),self.board))
             
     def get_king_moves(self, r, c, moves):
