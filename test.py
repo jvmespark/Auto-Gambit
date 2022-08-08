@@ -1,3 +1,5 @@
+print(1)
 
-for h in reversed(range(5)):
-    print(h)
+for x in reversed(range(0, 2)):
+    print(x)
+

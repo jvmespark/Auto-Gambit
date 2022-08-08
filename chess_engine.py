@@ -73,45 +73,7 @@ class gamestate():
                     moves.append(move((r,c),(r+1,c+1),self.board))
 
     def get_rook_moves(self, r, c, moves):
-        #something is bugged in here
-        #ill try again later
-        print("made it to rook")
-        r_place = r
-        c_place = c
-        if self.white_move:
-            print("made it to white")
-            for x in reversed(range(r_place)):
-                if self.board[x][c][0] == 'b' or self.board[x][c][0] == 'w':
-                    break
-                if self.board[x][c][0] == '--':
-                    print("appended x")
-                    moves.append(move((r,c),(x,c),self.board))
-            for x2 in range(7 - r_place):
-                if self.board[x2][c][0] == 'b' or self.board[x2][c][0] == 'w':
-                    break
-                if self.board[x2][c][0]=='--':
-                    print("appended x2")
-                    moves.append(move((r,c),(x2,c),self.board))
-            print("made it to reversed y")
-            for y in reversed(range(c_place)):
-                print("inside reversed")
-                print(r)
-                print(y)
-                if self.board[r][y][0] == '--':# or self.board[r][y][0] == 'w':
-                    print("inside break")
-                    #break
-                elif self.board[r][y][0]=='--':
-                    print("appended y")
-                    moves.append(move((r,c),(r,y),self.board))
-                    print(r)
-                    print(y)
-            for y2 in range(7-c_place):
-                if self.board[r][y2][0]=='b' or self.board[r][y2][0]=='w':
-                    break
-                if self.board[r][y2][0]=='--':
-                    print("appended y2")
-                    moves.append(move((r,c),(r,y2),self.board))
-            
+
         #every spot open to its:
             #left
             #right
@@ -119,7 +81,61 @@ class gamestate():
             #down
         #no diagonals
             #has to stop at the first taken spot closest to the piece both left and right
+            #first taken spot can be captured tho
             #cant do regular loop bc then u can slide the rook through a piece
+        
+        if self.white_move:
+            for y in reversed(range(r)):
+                if self.board[y][c][0] == 'b' or self.board[y][c][0] == 'w':
+                    moves.append(move((r,c),(y,c),self.board))
+                    break
+                if self.board[y][c] == '--':
+                    moves.append(move((r,c),(y,c),self.board))
+            for y2 in range(r + 1, 8): #original problem was that it was breaking at its own piece
+                if self.board[y2][c][0] == 'b' or self.board[y2][c][0] == 'w':
+                    moves.append(move((r,c),(y2,c),self.board))
+                    break
+                if self.board[y2][c]=='--':
+                    moves.append(move((r,c),(y2,c),self.board))
+
+            for x in reversed(range(c)):
+                if self.board[r][x][0] == '--' or self.board[r][x][0] == 'w':
+                    moves.append(move((r,c),(r,x),self.board))
+                    break
+                if self.board[r][x]=='--':
+                    moves.append(move((r,c),(r,x),self.board))
+            for x2 in range(c + 1, 8):
+                if self.board[r][x2][0]=='b' or self.board[r][x2][0]=='w':
+                    moves.append(move((r,c),(r,x2),self.board))
+                    break
+                if self.board[r][x2]=='--':
+                    moves.append(move((r,c),(r,x2),self.board))
+
+        if not self.white_move:
+            for y in reversed(range(r)):
+                if self.board[y][c][0] == 'b' or self.board[y][c][0] == 'w':
+                    moves.append(move((r,c),(y,c),self.board))
+                    break
+                if self.board[y][c] == '--':
+                    moves.append(move((r,c),(y,c),self.board))
+            for y2 in range(r + 1, 8):
+                if self.board[y2][c][0] == 'b' or self.board[y2][c][0] == 'w':
+                    moves.append(move((r,c),(y2,c),self.board))
+                    break
+                if self.board[y2][c]=='--':
+                    moves.append(move((r,c),(y2,c),self.board))
+            for x in reversed(range(c)):
+                if self.board[r][x][0] == '--' or self.board[r][x][0] == 'w':
+                    moves.append(move((r,c),(r,x),self.board))
+                    break
+                if self.board[r][x]=='--':
+                    moves.append(move((r,c),(r,x),self.board))
+            for x2 in range(c + 1, 8):
+                if self.board[r][x2][0]=='b' or self.board[r][x2][0]=='w':
+                    moves.append(move((r,c),(r,x2),self.board))
+                    break
+                if self.board[r][x2]=='--':
+                    moves.append(move((r,c),(r,x2),self.board))
 
     def get_queen_moves(self, r, c, moves):
         #moves the same as a bishop and a rook. so does this work?
