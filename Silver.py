@@ -45,7 +45,7 @@ def main():
     square_selected = ()
     #array
     player_clicks = []
-
+    
     running = True
     while (running):
             for event in pygame.event.get():
@@ -71,7 +71,7 @@ def main():
                         if move in valid_moves:
                             gamestate.make_move(move)
                             moveMade = True
-
+                        
                         square_selected = ()
                         player_clicks = []
                 

@@ -8,12 +8,20 @@ class gamestate():
                         ['--', '--', '--', '--', '--', '--', '--', '--'],
                         ['--', '--', '--', '--', '--', '--', '--', '--'],
                         ['wp', 'wp', 'wp', 'wp', 'wp', 'wp', 'wp', 'wp'],
-                        ['wr', 'wn', 'wb', 'wk', 'wq', 'wb', 'wn', 'wr']
+                        ['wr', 'wn', 'wb', 'wq', 'wk', 'wb', 'wn', 'wr']
                      ]
         self.white_move = True
         self.move_log = []
         self.move_functions = {'p': self.get_pawn_moves, 'q': self.get_queen_moves, 'k':self.get_king_moves, 
                                'n':self.get_knight_moves, 'r':self.get_rook_moves, 'b':self.get_bishop_moves}
+        #keep track of king pos
+        self.white_king_location = (7,4)
+        self.black_king_location = (0,4)
+
+        #no valid moves and the king is in check
+        self.checkmate = False
+        #no valid moves and the kings is not in check
+        self.statemate = False
 
     def make_move(self, move):
         #make old spot blank
@@ -23,6 +31,12 @@ class gamestate():
         self.board[move.end_square_row][move.end_square_column] = move.piece_moved
         self.move_log.append(move)
         
+        #update king pos
+        if move.piece_moved == 'wk':
+            self.white_king_location = (move.end_square_row, move.end_square_column)
+        elif move.piece_moved == 'bk':
+            self.black_king_location = (move.end_square_row, move.end_square_column)
+
         self.white_move = not self.white_move
 
     def undo_move(self):
@@ -30,11 +44,53 @@ class gamestate():
             last_move = self.move_log.pop()
             self.board[last_move.start_square_row][last_move.start_square_column] = last_move.piece_moved
             self.board[last_move.end_square_row][last_move.end_square_column] = last_move.piece_captured
+       
+            #update kings pos
+            if last_move.piece_moved == 'wk':
+                self.white_king_location = (last_move.start_square_row, last_move.start_square_column)
+            elif last_move.piece_moved == 'bk':
+                self.black_king_location = (last_move.start_square_row, last_move.start_square_column)
+
             self.white_move = not self.white_move
-
+    
     def get_valid_moves(self):
-        return self.get_all_possible_moves()
+        moves = self.get_all_possible_moves()
+        for i in reversed(range(len(moves))):
+            self.make_move(moves[i])
+            #make move swaps moves, but we need to still check the move players, so we switch it back
+            self.white_move = not self.white_move
+            if self.in_check():
+                #if king is under attack, its not a valid move
+                moves.remove(moves[i])
+            self.white_move = not self.white_move
+            self.undo_move() #cancel out the make move
+        
+            if len(moves)==0:
+                if self.in_check():
+                    self.checkmate = True
+                else:
+                    self.stalemate = True
+            else:
+                self.checkmate = False
+                self.stalemate = False
 
+        return moves
+
+    def in_check(self):
+        if self.white_move:
+            return self.square_attacked(self.white_king_location[0], self.white_king_location[1])
+        if not self.white_move:
+            return self.square_attacked(self.black_king_location[0], self.black_king_location[1])
+
+    def square_attacked(self, r, c):
+        self.white_move = not self.white_move
+        enemy_moves = self.get_all_possible_moves()
+        self.white_move = not self.white_move
+        for move in enemy_moves:
+            if move.end_square_row == r and move.end_square_column == c:
+                return True
+        return False
+        
     def get_all_possible_moves(self):
         moves = []
         for r in range(len(self.board)):
@@ -278,7 +334,7 @@ class gamestate():
             if c - 1 >= 0:
                 if r-2>=0:
                     if self.board[r-2][c-1]=='--' or self.board[r-2][c-1][0]=='b':
-                        moves.append(move((r,c),(r-1,c-1),self.board))
+                        moves.append(move((r,c),(r-2,c-1),self.board))
                 if r+2 < len(self.board[0]):
                     if self.board[r+2][c-1]=='--' or self.board[r-2][c-1][0]=='b':
                         moves.append(move((r,c),(r+2,c-1),self.board))
@@ -370,28 +426,6 @@ class gamestate():
             if c+1 < len(self.board):    
                 if self.board[r+1][c+1][0] == 'w':
                     moves.append(move((r,c),(r+1,c+1),self.board))
-
-
- #       if self.white_move:
- #           if c-1>=0:
- #               if r-1<=0:
- #                   if self.board[r-1][c-1]=='--' or self.board[r-1][c-1]=='b':
- #                       moves.append(move((r,c),(r-1,c-1), self.board))
- #               if r+1 < len(self.board[0]):
- #                   if self.board[r+1][c-1]=='--' or self.board[r+1][c-1]=='b':
- #                       moves.append(move((r,c),(r+1,c-1),self.board))
-#                if self.board[r][c-1]=='--' or self.board[r][c-1]=='b':
- #                   moves.append(move((r,c),(r,c-1),self.board))
-  #          if c+1<7:
-   #             if r-1>=-0:
-    #                if self.board[r-1][c+1]=='--' or self.board[r-1][c+1]=='b':
-     #                   moves.append(move((r,c),(r-1,c+1), self.board))
-      #          if r+1<len(self.board[0]):
-       #                 if self.board[r+1][c+1]=='--' or self.board[r+1][c+1]=='b':
-        #                    moves.append(move((r,c),(r+1,c+1),self.board))
-         #       if self.board[r][c+1]=='--' or self.board[r][c+1]=='b':
-          #          moves.append(move((r,c),(r,c+1),self.board))
-
 class move():
     #map key values 
     row_ranks = {"1" : 7, "2" : 6, "3" : 5, "4" : 4, "5" : 3, "6" : 2, "7" : 1, "8" : 0}
