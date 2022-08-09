@@ -22,6 +22,7 @@ class gamestate():
         self.checkmate = False
         #no valid moves and the kings is not in check
         self.statemate = False
+        self.enpassant_coordinates = () #coordinates where empassant is possible
 
     def make_move(self, move):
         #make old spot blank
@@ -37,6 +38,18 @@ class gamestate():
         elif move.piece_moved == 'bk':
             self.black_king_location = (move.end_square_row, move.end_square_column)
 
+        if move.pawn_promotion:
+#            change = input("Change pawn to: 'q', 'r'\n")
+            self.board[move.end_square_row][move.end_square_column] = move.piece_moved[0] + 'q'
+
+        if move.enpassant:
+            self.board[move.start_square_row][move.end_square_column] = '--'
+
+        if move.piece_moved[1] == 'p' and abs(move.start_square_row - move.end_square_row) == 2:
+            self.enpassant_coordinates=((move.start_square_row+move.end_square_row)//2,move.end_square_column)
+        else:
+            self.enpassant_coordinates=()
+
         self.white_move = not self.white_move
 
     def undo_move(self):
@@ -50,10 +63,18 @@ class gamestate():
                 self.white_king_location = (last_move.start_square_row, last_move.start_square_column)
             elif last_move.piece_moved == 'bk':
                 self.black_king_location = (last_move.start_square_row, last_move.start_square_column)
+            
+            if last_move.enpassant:
+                self.board[last_move.end_square_row][last_move.end_square_column]='--'
+                self.board[last_move.start_square_row][last_move.end_square_column]=last_move.piece_captured
+                self.enpassant_coordinates=(last_move.end_square_row,last_move.end_square_column)
+            if last_move.piece_moved[1]=='p' and abs(last_move.start_square_row-last_move.end_square_row)==2:
+                self.enpassant_coordinates=()
 
             self.white_move = not self.white_move
     
     def get_valid_moves(self):
+        temp_enpassant = self.enpassant_coordinates
         moves = self.get_all_possible_moves()
         for i in reversed(range(len(moves))):
             self.make_move(moves[i])
@@ -73,7 +94,8 @@ class gamestate():
             else:
                 self.checkmate = False
                 self.stalemate = False
-
+        
+        self.enpassant_coordinates = temp_enpassant
         return moves
 
     def in_check(self):
@@ -105,17 +127,21 @@ class gamestate():
             #blank move
             if self.board[r - 1][c] == '--': #1 square move
                 moves.append(move((r,c),(r-1,c), self.board))
-                if r == 6 and self.board[r - 2][c] == '--': #2 square move
-                    moves.append(move((r,c),(r-2,c),self.board))
+            if r == 6 and self.board[r - 2][c] == '--': #2 square move
+                moves.append(move((r,c),(r-2,c),self.board))
             
             #capture moves. can only capture diagonally and cant go off the board
             if c-1 >= 0:
                 if self.board[r-1][c-1][0] == 'b':
                     moves.append(move((r,c),(r-1,c-1),self.board))
+                elif (r-1,c-1)==self.enpassant_coordinates:
+                    moves.append(move((r,c),(r-1,c-1),self.board,enpassant_possible=True))
             if c+1 < len(self.board):   
                 if self.board[r-1][c+1][0] == 'b':
                     moves.append(move((r,c),(r-1,c+1),self.board))
-
+                elif (r-1,c+1)==self.enpassant_coordinates:
+                    moves.append(move((r,c),(r-1,c+1),self.board,enpassant_possible=True))
+ 
         if not self.white_move:
             if self.board[r + 1][c] == '--':
                 moves.append(move((r,c),(r+1,c), self.board))
@@ -124,10 +150,15 @@ class gamestate():
             if c-1 >= 0:
                 if self.board[r+1][c-1][0] == 'w':
                     moves.append(move((r,c),(r+1,c-1),self.board))
+                elif (r+1,c-1)==self.enpassant_coordinates:
+                    moves.append(move((r,c),(r+1,c-1),self.board,enpassant_possible=True))
+ 
             if c+1 < len(self.board):    
                 if self.board[r+1][c+1][0] == 'w':
                     moves.append(move((r,c),(r+1,c+1),self.board))
-
+                elif (r+1,c+1)==self.enpassant_coordinates:
+                    moves.append(move((r,c),(r+1,c+1),self.board,enpassant_possible=True))
+ 
     def get_rook_moves(self, r, c, moves):
 
         #every spot open to its:
@@ -434,7 +465,7 @@ class move():
     column_files = {"a" : 0, "b" : 1, "c" : 2, "d" : 3, "e" : 4, "f" : 5, "g" : 6, "h" : 7}
     column_to_file = {v: k for k, v in column_files.items()}
 
-    def __init__(self, start_square, end_square, board):
+    def __init__(self, start_square, end_square, board, enpassant_possible = False ):
         self.start_square_row = start_square[0]
         self.start_square_column = start_square[1]
         self.end_square_row = end_square[0]
@@ -442,10 +473,18 @@ class move():
 
         self.piece_moved = board[self.start_square_row][self.start_square_column]
         self.piece_captured = board[self.end_square_row][self.end_square_column]
-            
+
+        self.pawn_promotion = False
+        if (self.piece_moved == 'wp' and self.end_square_row == 0) or (self.piece_moved == 'bp' and self.end_square_row == 7):
+            self.pawn_promotion = True
+
+        self.enpassant = enpassant_possible
+        if self.enpassant:
+            self.piece_captured='wp' if self.piece_moved=='bp' else 'bp'
+
         self.moveID = self.start_square_row * 1000 + self.start_square_column * 100 + self.end_square_row * 10 + self.end_square_column
 
-    "overriding equal"
+    #overriding equal
     def __eq__(self, other):
         if isinstance(other, move):
             return self.moveID == other.moveID

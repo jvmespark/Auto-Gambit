@@ -68,12 +68,15 @@ def main():
                     if len(player_clicks) == 2:
                         move = engine.move(player_clicks[0], player_clicks[1], gamestate.board)
                         print(move.get_chess_notation())
-                        if move in valid_moves:
-                            gamestate.make_move(move)
-                            moveMade = True
+                        for i in range(len(valid_moves)):
+                            if move == valid_moves[i]:
+                                gamestate.make_move(valid_moves[i])
+                                moveMade = True
                         
-                        square_selected = ()
-                        player_clicks = []
+                                square_selected = ()
+                                player_clicks = []
+                        if not moveMade:
+                            player_clicks = [square_selected]
                 
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_BACKSPACE or event.key == pygame.K_u:
