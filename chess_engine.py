@@ -80,9 +80,9 @@ class gamestate():
             self.make_move(moves[i])
             #make move swaps moves, but we need to still check the move players, so we switch it back
             self.white_move = not self.white_move
-            if self.in_check():
-                #if king is under attack, its not a valid move
-                moves.remove(moves[i])
+            #if self.in_check():
+            #    #if king is under attack, its not a valid move
+            #    moves.remove(moves[i])
             self.white_move = not self.white_move
             self.undo_move() #cancel out the make move
         
@@ -429,8 +429,12 @@ class gamestate():
             #same row
             #up 1
         if self.white_move: #white moves go forward by subtraction
-            if self.board[r - 1][c] == '--' or self.board[r-1][c]=='b':
-                moves.append(move((r,c),(r-1,c), self.board)) 
+            if r-1>=0:
+                if self.board[r - 1][c] == '--' or self.board[r-1][c]=='b':
+                    moves.append(move((r,c),(r-1,c), self.board)) 
+            if r+1<len(self.board[0]):
+                if self.board[r + 1][c] == '--' or self.board[r+1][c]=='b':
+                    moves.append(move((r,c),(r+1,c), self.board)) 
             if c-1 >= 0:
                 if r-1>=0:
                     if self.board[r-1][c-1][0] == 'b' or self.board[r-1][c-1]=='--':
@@ -444,19 +448,29 @@ class gamestate():
                         moves.append(move((r,c),(r-1,c+1),self.board))
                 if r+1<len(self.board[0]): 
                     if self.board[r+1][c+1]=='--' or self.board[r+1][c+1][0]=='b':
-                         moves.append(move((r,c),(r-1,c+1),self.board))
+                         moves.append(move((r,c),(r+1,c+1),self.board))
 
         if not self.white_move:
-            if self.board[r + 1][c] == '--':
-                moves.append(move((r,c),(r+1,c), self.board))
-                if r == 1 and self.board[r + 2][c] == '--':
-                    moves.append(move((r,c),(r+2,c), self.board))
+            if r-1>=0:
+                if self.board[r - 1][c] == '--' or self.board[r-1][c]=='w':
+                    moves.append(move((r,c),(r-1,c), self.board)) 
+            if r+1<len(self.board[0]):
+                if self.board[r + 1][c] == '--' or self.board[r+1][c]=='w':
+                    moves.append(move((r,c),(r+1,c), self.board)) 
             if c-1 >= 0:
-                if self.board[r+1][c-1][0] == 'w':
-                    moves.append(move((r,c),(r+1,c-1),self.board))
-            if c+1 < len(self.board):    
-                if self.board[r+1][c+1][0] == 'w':
-                    moves.append(move((r,c),(r+1,c+1),self.board))
+                if r-1>=0:
+                    if self.board[r-1][c-1][0] == 'w' or self.board[r-1][c-1]=='--':
+                        moves.append(move((r,c),(r-1,c-1),self.board))
+                if r+1<len(self.board[0]):
+                    if self.board[r+1][c-1] == '--' or self.board[r+1][c-1][0] == 'w':
+                        moves.append(move((r,c),(r+1,c-1), self.board))
+            if c+1 < len(self.board):   
+                if r-1>=0:    
+                    if self.board[r-1][c+1][0] == 'w' or self.board[r-1][c+1]=='--':
+                        moves.append(move((r,c),(r-1,c+1),self.board))
+                if r+1<len(self.board[0]): 
+                    if self.board[r+1][c+1]=='--' or self.board[r+1][c+1][0]=='w':
+                         moves.append(move((r,c),(r+1,c+1),self.board))
 class move():
     #map key values 
     row_ranks = {"1" : 7, "2" : 6, "3" : 5, "4" : 4, "5" : 3, "6" : 2, "7" : 1, "8" : 0}
