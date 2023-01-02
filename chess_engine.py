@@ -436,6 +436,8 @@ class gamestate():
                 if self.board[r + 1][c] == '--' or self.board[r+1][c]=='b':
                     moves.append(move((r,c),(r+1,c), self.board)) 
             if c-1 >= 0:
+                if self.board[r][c-1] == '--' or self.board[r][c-1]=='b':
+                    moves.append(move((r,c),(r,c-1), self.board)) 
                 if r-1>=0:
                     if self.board[r-1][c-1][0] == 'b' or self.board[r-1][c-1]=='--':
                         moves.append(move((r,c),(r-1,c-1),self.board))
@@ -443,6 +445,8 @@ class gamestate():
                     if self.board[r+1][c-1] == '--' or self.board[r+1][c-1][0] == 'b':
                         moves.append(move((r,c),(r+1,c-1), self.board))
             if c+1 < len(self.board):   
+                if self.board[r][c+1] == '--' or self.board[r][c+1]=='b':
+                    moves.append(move((r,c),(r,c+1), self.board)) 
                 if r-1>=0:    
                     if self.board[r-1][c+1][0] == 'b' or self.board[r-1][c+1]=='--':
                         moves.append(move((r,c),(r-1,c+1),self.board))
@@ -458,6 +462,8 @@ class gamestate():
                 if self.board[r + 1][c] == '--' or self.board[r+1][c]=='w':
                     moves.append(move((r,c),(r+1,c), self.board)) 
             if c-1 >= 0:
+                if self.board[r][c-1] == '--' or self.board[r][c-1]=='w':
+                    moves.append(move((r,c),(r,c-1), self.board)) 
                 if r-1>=0:
                     if self.board[r-1][c-1][0] == 'w' or self.board[r-1][c-1]=='--':
                         moves.append(move((r,c),(r-1,c-1),self.board))
@@ -465,6 +471,8 @@ class gamestate():
                     if self.board[r+1][c-1] == '--' or self.board[r+1][c-1][0] == 'w':
                         moves.append(move((r,c),(r+1,c-1), self.board))
             if c+1 < len(self.board):   
+                if self.board[r][c+1] == '--' or self.board[r][c+1]=='w':
+                    moves.append(move((r,c),(r,c+1), self.board)) 
                 if r-1>=0:    
                     if self.board[r-1][c+1][0] == 'w' or self.board[r-1][c+1]=='--':
                         moves.append(move((r,c),(r-1,c+1),self.board))
