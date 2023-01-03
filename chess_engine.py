@@ -80,9 +80,9 @@ class gamestate():
             self.make_move(moves[i])
             #make move swaps moves, but we need to still check the move players, so we switch it back
             self.white_move = not self.white_move
-            #if self.in_check():
-            #    #if king is under attack, its not a valid move
-            #    moves.remove(moves[i])
+            if self.in_check():
+                #if king is under attack, its not a valid move
+                moves.remove(moves[i])
             self.white_move = not self.white_move
             self.undo_move() #cancel out the make move
         
