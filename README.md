@@ -15,6 +15,8 @@
 - Chess AI
 - Online Multiplayer
 
+# Screenshot
+
 ![](https://user-images.githubusercontent.com/119146767/211708056-47aea29e-3217-417c-8b24-5561b6121f15.png)
 
 # Acknowledgements
