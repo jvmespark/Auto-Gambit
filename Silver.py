@@ -36,7 +36,7 @@ def load_pieces(screen, board):
             if piece != '--':
                 screen.blit(IMAGES[piece], pygame.Rect(column * PIECE_SIZE, row * PIECE_SIZE, PIECE_SIZE, PIECE_SIZE))
 
-def playGUI(algo, selfplay):
+def playGUI(against, selfplay, algo):
     gamestate = engine.gamestate()
     valid_moves, checkmate, stalemate = gamestate.get_valid_moves()
     pygame.init()
@@ -103,20 +103,27 @@ def playGUI(algo, selfplay):
                 running = False
 
 def printBoard(board):
+    pattern = 0
     for r in board:
-        print(r)
+        for c in r:
+            if c == "--" and pattern%2!=0: print("##", end =" ")
+            elif c == "--" and pattern%2==0: print("  ", end=" ")
+            else: print(c, end =" ")
+            pattern += 1
+        print("\n")
+        pattern += 1
 
 def validNotation(userMove):
-    if userMove[0].lower() not in "abcdefgh" or userMove[1] not in range(8) or userMove[2].lower() not in "abcdefgh" or userMove[3] not in range(8):
-        return False
-    return True
+    return False if userMove[0].lower() not in "abcdefgh" or int(userMove[1]) not in range(9) or userMove[2].lower() not in "abcdefgh" or int(userMove[3]) not in range(9) else True
 
-def playTerminal(algo, selfplay):
-    if algo:
-        print("algo")
+def playTerminal(against, selfplay, algo):
+    if against:
+        # for now, default player as white
+        print("against")
     if selfplay:
         print("selfplay")
-        
+    print(algo)
+
     gamestate = engine.gamestate()
     valid_moves, checkmate, stalemate = gamestate.get_valid_moves()
     moveMade = False #until a valid move is made, then you shouldnt regenerate an expensive function like get valid moves
@@ -125,6 +132,7 @@ def playTerminal(algo, selfplay):
     
     running = True
     while (running):
+            # NOTE: this current implementation of user input parsing is wrong, i should write a finite automaton to solve this
             userMove = input(">> ")
             if not validNotation(userMove):
                 print("ERROR: Invalid Notation")
@@ -132,6 +140,10 @@ def playTerminal(algo, selfplay):
             if userMove == "u":
                 gamestate.undo_move()
                 valid_moves, checkmate, stalemate = gamestate.get_valid_moves()
+            if userMove == "q":
+                exit(0)
+
+
             move = engine.move.notated(userMove, gamestate.board)
             for i in range(len(valid_moves)):
                 if move == valid_moves[i]:
@@ -144,29 +156,33 @@ def playTerminal(algo, selfplay):
 
             printBoard(gamestate.board)
             if checkmate or stalemate:
-                time.sleep(5)
                 running = False
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
-    FUNCTION_MAP = {'gui' : playGUI,
-                'cmd' : playTerminal}
+    FUNCTION_MAP = {'gui' : playGUI, 'cmd' : playTerminal}
 
-    command_help = "gui: play with a mouse on a GUI interface\ncmd: play on terminal with traditional chess notation"
+    command_help = "gui: play with a mouse on a GUI interface.\ncmd: play on terminal with traditional chess notation."
     parser.add_argument('command', choices=FUNCTION_MAP.keys(), help=command_help)
 
-    parser.add_argument("--algo", action="store_true", help="Play against the AI algorithm")
-    parser.add_argument("--selfplay", action="store_true", help="Have the engine against itself")
+    parser.add_argument("--against", action="store_true", help="Play against the AI algorithm.")
+    parser.add_argument("--selfplay", action="store_true", help="Have the engine against itself.")
+    parser.add_argument('--algo',
+                    default=["min-max"],
+                    help='Enable a specific algorithm to be used as the backend for the engine.\nOptions:\nmin-max[default]\nalpha-beta\n',
+                    type=str,
+                    nargs=1
+                    )
 
     if len(sys.argv) <= 1:
         sys.argv.append('--help')
 
     args = parser.parse_args()
 
-    algo, selfplay = args.algo, args.selfplay
+    against, selfplay, algo = args.against, args.selfplay, args.algo[0]
 
     playMode = FUNCTION_MAP[args.command]
-    playMode(algo, selfplay)
+    playMode(against, selfplay, algo)
         
 
 if __name__ == "__main__":
