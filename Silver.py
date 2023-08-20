@@ -1,12 +1,18 @@
-import pygame
+
 import chess_engine as engine
+import sys
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
+import pygame
+import time
+import argparse
 
 WIDTH = HEIGHT = 500
 DIMENSION = 8
 PIECE_SIZE = HEIGHT / DIMENSION
 MAX_FPS = 15
-
 IMAGES = {}
+STATE = "GRAPHICS"
 
 #king and knight are the same initial. So Im delegating knight to night
 def load_images():
@@ -30,23 +36,24 @@ def load_pieces(screen, board):
             if piece != '--':
                 screen.blit(IMAGES[piece], pygame.Rect(column * PIECE_SIZE, row * PIECE_SIZE, PIECE_SIZE, PIECE_SIZE))
 
-def main():
+def playGUI(algo, selfplay):
+    gamestate = engine.gamestate()
+    valid_moves, checkmate, stalemate = gamestate.get_valid_moves()
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
-    pygame.display.set_caption("PyChess")
-    
-    gamestate = engine.gamestate()
-    valid_moves = gamestate.get_valid_moves()
-    moveMade = False #until a valid move is made, then you shouldnt regenerate an expensive function like get valid moves
+    pygame.display.set_caption("Silver Chess")
     load_images()
-
+    moveMade = False #until a valid move is made, then you shouldnt regenerate an expensive function like get valid moves
+    
     #tuple
     square_selected = ()
     #array
     player_clicks = []
     
+    
     running = True
+    checkmate, stalemate = False, False
     while (running):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -81,15 +88,86 @@ def main():
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_BACKSPACE or event.key == pygame.K_u:
                         gamestate.undo_move()
-                        valid_moves = gamestate.get_valid_moves()
+                        valid_moves, checkmate, stalemate = gamestate.get_valid_moves()
 
             if moveMade:
-                valid_moves = gamestate.get_valid_moves()
+                valid_moves, checkmate, stalemate = gamestate.get_valid_moves()
                 moveMade = False
 
             load_gamestate(screen, gamestate)
             clock.tick(MAX_FPS)
             pygame.display.flip()
+
+            if checkmate or stalemate:
+                time.sleep(5) # let the winner bask in their glory for 5 seconds then close game
+                running = False
+
+def printBoard(board):
+    for r in board:
+        print(r)
+
+def validNotation(userMove):
+    if userMove[0].lower() not in "abcdefgh" or userMove[1] not in range(8) or userMove[2].lower() not in "abcdefgh" or userMove[3] not in range(8):
+        return False
+    return True
+
+def playTerminal(algo, selfplay):
+    if algo:
+        print("algo")
+    if selfplay:
+        print("selfplay")
+        
+    gamestate = engine.gamestate()
+    valid_moves, checkmate, stalemate = gamestate.get_valid_moves()
+    moveMade = False #until a valid move is made, then you shouldnt regenerate an expensive function like get valid moves
+    printBoard(gamestate.board)
+    checkmate, stalemate = False, False
+    
+    running = True
+    while (running):
+            userMove = input(">> ")
+            if not validNotation(userMove):
+                print("ERROR: Invalid Notation")
+                userMove = input(">> ")
+            if userMove == "u":
+                gamestate.undo_move()
+                valid_moves, checkmate, stalemate = gamestate.get_valid_moves()
+            move = engine.move.notated(userMove, gamestate.board)
+            for i in range(len(valid_moves)):
+                if move == valid_moves[i]:
+                    gamestate.make_move(valid_moves[i])
+                    moveMade = True
+
+            if moveMade:
+                valid_moves, checkmate, stalemate = gamestate.get_valid_moves()
+                moveMade = False
+
+            printBoard(gamestate.board)
+            if checkmate or stalemate:
+                time.sleep(5)
+                running = False
+
+def main():
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
+    FUNCTION_MAP = {'gui' : playGUI,
+                'cmd' : playTerminal}
+
+    command_help = "gui: play with a mouse on a GUI interface\ncmd: play on terminal with traditional chess notation"
+    parser.add_argument('command', choices=FUNCTION_MAP.keys(), help=command_help)
+
+    parser.add_argument("--algo", action="store_true", help="Play against the AI algorithm")
+    parser.add_argument("--selfplay", action="store_true", help="Have the engine against itself")
+
+    if len(sys.argv) <= 1:
+        sys.argv.append('--help')
+
+    args = parser.parse_args()
+
+    algo, selfplay = args.algo, args.selfplay
+
+    playMode = FUNCTION_MAP[args.command]
+    playMode(algo, selfplay)
+        
 
 if __name__ == "__main__":
     main()

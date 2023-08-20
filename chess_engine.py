@@ -96,7 +96,7 @@ class gamestate():
                 self.stalemate = False
         
         self.enpassant_coordinates = temp_enpassant
-        return moves
+        return moves, self.checkmate, self.stalemate
 
     def in_check(self):
         if self.white_move:
@@ -505,6 +505,15 @@ class move():
             self.piece_captured='wp' if self.piece_moved=='bp' else 'bp'
 
         self.moveID = self.start_square_row * 1000 + self.start_square_column * 100 + self.end_square_row * 10 + self.end_square_column
+
+    @classmethod
+    def notated(cls, notatedMove, board):
+        start_square_row = 8-int(notatedMove[1])
+        start_square_column = ord(notatedMove[0].lower())-97
+        end_square_row = 8-int(notatedMove[3])
+        end_square_column = ord(notatedMove[2].lower())-97
+
+        return cls([start_square_row, start_square_column], [end_square_row, end_square_column], board)
 
     #overriding equal
     def __eq__(self, other):

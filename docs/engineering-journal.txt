@@ -1,0 +1,2 @@
+8/20/2023
+Picking this project back up again with the main goal of building the AI algorithms behind it. But first, I'm going to clean up the code and implement no-graphic.
