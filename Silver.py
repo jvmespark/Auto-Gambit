@@ -1,6 +1,6 @@
 
 import chess_engine as engine
-import sys
+import algo_engine
 import os
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
@@ -36,7 +36,7 @@ def load_pieces(screen, board):
             if piece != '--':
                 screen.blit(IMAGES[piece], pygame.Rect(column * PIECE_SIZE, row * PIECE_SIZE, PIECE_SIZE, PIECE_SIZE))
 
-def playGUI(against, selfplay, algo):
+def playGUI(computer, algo):
     gamestate = engine.gamestate()
     valid_moves, checkmate, stalemate = gamestate.get_valid_moves()
     pygame.init()
@@ -55,40 +55,45 @@ def playGUI(against, selfplay, algo):
     running = True
     checkmate, stalemate = False, False
     while (running):
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    #Needs to:
-                    #-Move the piece to the next clicked spot IF the spot is empty --
-                    #-deselect the piece if the player clicks the same piece again
-                    mouse_location = pygame.mouse.get_pos()
-                    column = int(mouse_location[0] // PIECE_SIZE)
-                    row = int(mouse_location[1] // PIECE_SIZE)
+            if not gamestate.moveState():
+                move = algo_engine.minMax(gamestate, 3)
+                gamestate.make_move(move)
+                moveMade = True
+            else:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        running = False
+                    elif event.type == pygame.MOUSEBUTTONDOWN:
+                        #Needs to:
+                        #-Move the piece to the next clicked spot IF the spot is empty --
+                        #-deselect the piece if the player clicks the same piece again
+                        mouse_location = pygame.mouse.get_pos()
+                        column = int(mouse_location[0] // PIECE_SIZE)
+                        row = int(mouse_location[1] // PIECE_SIZE)
 
-                    if  square_selected == (row, column):
-                        square_selected = ()
-                        player_clicks = []
-                    else:
-                        square_selected = (row, column)
-                        player_clicks.append(square_selected)
-                    if len(player_clicks) == 2:
-                        move = engine.move(player_clicks[0], player_clicks[1], gamestate.board)
-                        print(move.get_chess_notation())
-                        for i in range(len(valid_moves)):
-                            if move == valid_moves[i]:
-                                gamestate.make_move(valid_moves[i])
-                                moveMade = True
-                        
-                                square_selected = ()
-                                player_clicks = []
-                        if not moveMade:
-                            player_clicks = [square_selected]
-                
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_BACKSPACE or event.key == pygame.K_u:
-                        gamestate.undo_move()
-                        valid_moves, checkmate, stalemate = gamestate.get_valid_moves()
+                        if  square_selected == (row, column):
+                            square_selected = ()
+                            player_clicks = []
+                        else:
+                            square_selected = (row, column)
+                            player_clicks.append(square_selected)
+                        if len(player_clicks) == 2:
+                            move = engine.move(player_clicks[0], player_clicks[1], gamestate.board)
+                            print(move.get_chess_notation())
+                            for i in range(len(valid_moves)):
+                                if move == valid_moves[i]:
+                                    gamestate.make_move(valid_moves[i])
+                                    moveMade = True
+                            
+                                    square_selected = ()
+                                    player_clicks = []
+                            if not moveMade:
+                                player_clicks = [square_selected]
+                    
+                    elif event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_BACKSPACE or event.key == pygame.K_u:
+                            gamestate.undo_move()
+                            valid_moves, checkmate, stalemate = gamestate.get_valid_moves()
 
             if moveMade:
                 valid_moves, checkmate, stalemate = gamestate.get_valid_moves()
@@ -116,39 +121,42 @@ def printBoard(board):
 def validNotation(userMove):
     return False if userMove[0].lower() not in "abcdefgh" or int(userMove[1]) not in range(9) or userMove[2].lower() not in "abcdefgh" or int(userMove[3]) not in range(9) else True
 
-def playTerminal(against, selfplay, algo):
-    if against:
-        # for now, default player as white
-        print("against")
-    if selfplay:
-        print("selfplay")
-    print(algo)
+def playTerminal(computer, algo):
 
     gamestate = engine.gamestate()
     valid_moves, checkmate, stalemate = gamestate.get_valid_moves()
     moveMade = False #until a valid move is made, then you shouldnt regenerate an expensive function like get valid moves
+
+    #if computer == "against":
+    #    algo_engine.activate(algo, gamestate)
+
     printBoard(gamestate.board)
     checkmate, stalemate = False, False
     
     running = True
     while (running):
             # NOTE: this current implementation of user input parsing is wrong, i should write a finite automaton to solve this
-            userMove = input(">> ")
-            if not validNotation(userMove):
-                print("ERROR: Invalid Notation")
+            if not gamestate.moveState():
+                move = algo_engine.minMax(gamestate, 1)
+                gamestate.make_move(move)
+                moveMade = True
+            else:
                 userMove = input(">> ")
-            if userMove == "u":
-                gamestate.undo_move()
-                valid_moves, checkmate, stalemate = gamestate.get_valid_moves()
-            if userMove == "q":
-                exit(0)
+                if not validNotation(userMove):
+                    print("ERROR: Invalid Notation")
+                    userMove = input(">> ")
+                if userMove == "u":
+                    gamestate.undo_move()
+                    valid_moves, checkmate, stalemate = gamestate.get_valid_moves()
+                if userMove == "q":
+                    exit(0)
 
-
-            move = engine.move.notated(userMove, gamestate.board)
-            for i in range(len(valid_moves)):
-                if move == valid_moves[i]:
-                    gamestate.make_move(valid_moves[i])
-                    moveMade = True
+            if gamestate.moveState(): # white turn, so player goes
+                move = engine.move.notated(userMove, gamestate.board)
+                for i in range(len(valid_moves)):
+                    if move == valid_moves[i]:
+                        gamestate.make_move(valid_moves[i])
+                        moveMade = True
 
             if moveMade:
                 valid_moves, checkmate, stalemate = gamestate.get_valid_moves()
@@ -162,27 +170,31 @@ def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
     FUNCTION_MAP = {'gui' : playGUI, 'cmd' : playTerminal}
 
-    command_help = "gui: play with a mouse on a GUI interface.\ncmd: play on terminal with traditional chess notation."
-    parser.add_argument('command', choices=FUNCTION_MAP.keys(), help=command_help)
-
-    parser.add_argument("--against", action="store_true", help="Play against the AI algorithm.")
-    parser.add_argument("--selfplay", action="store_true", help="Have the engine against itself.")
+    parser.add_argument('--play',
+                    default=["cmd"],
+                    help='Play on cmd[default] or gui\n\n',
+                    type=str,
+                    nargs=1
+                    )
+    parser.add_argument('--computer',
+                    default=["disabled"],
+                    help='Choose which method to utilize the computer AI\nOptions:\ndisabled[default]\nagainst: Play against the algorithm\nautoplay: Have the engine play against itself\n\n',
+                    type=str,
+                    nargs=1
+                    )
     parser.add_argument('--algo',
                     default=["min-max"],
-                    help='Enable a specific algorithm to be used as the backend for the engine.\nOptions:\nmin-max[default]\nalpha-beta\n',
+                    help='Enable a specific algorithm to be used as the backend for the engine.\nOptions:\nmin-max[default]\nalpha-beta\n\n',
                     type=str,
                     nargs=1
                     )
 
-    if len(sys.argv) <= 1:
-        sys.argv.append('--help')
-
     args = parser.parse_args()
 
-    against, selfplay, algo = args.against, args.selfplay, args.algo[0]
+    computer, algo = args.computer[0], args.algo[0]
 
-    playMode = FUNCTION_MAP[args.command]
-    playMode(against, selfplay, algo)
+    playMode = FUNCTION_MAP[args.play[0]]
+    playMode(computer, algo)
         
 
 if __name__ == "__main__":

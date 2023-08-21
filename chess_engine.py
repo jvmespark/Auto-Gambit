@@ -52,6 +52,9 @@ class gamestate():
 
         self.white_move = not self.white_move
 
+    def moveState(self):
+        return self.white_move
+
     def undo_move(self):
         if len(self.move_log) != 0:
             last_move = self.move_log.pop()
@@ -71,6 +74,7 @@ class gamestate():
             if last_move.piece_moved[1]=='p' and abs(last_move.start_square_row-last_move.end_square_row)==2:
                 self.enpassant_coordinates=()
 
+            self.checkmate, self.stalemate = False, False
             self.white_move = not self.white_move
     
     def get_valid_moves(self):
