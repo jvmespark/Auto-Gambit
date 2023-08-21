@@ -1,7 +1,8 @@
 
 from copy import deepcopy
+import random
 
-
+# NOTE: Likely crashing when it calculates a checkmate in 3 and shuts down the program prematurely? working theory
 
 def minMax(gamestate, N):
     # call at move state only. later look to abstract to classes but for now just build this one function that is called only on its move.
@@ -29,17 +30,22 @@ def minMax(gamestate, N):
         return score
     
     moves, checkmate, stalemate = gamestate.get_valid_moves()
+    if checkmate or stalemate or N == 0:
+        return None
+    best_move = random.choice(moves)
     scores = []
 
     for move in moves:
         temp = deepcopy(gamestate)              
         temp.make_move(move)
-
         if N>1:
             temp_best_move = minMax(temp,N-1)
-            temp.make_move(temp_best_move)
+            if not temp_best_move == None:
+                temp.make_move(temp_best_move)
 
         scores.append(eval_board(temp))
+
+    #print(N, len(moves), checkmate, stalemate, len(scores), scores)
 
     if not gamestate.moveState: #black turn
         best_move = moves[scores.index(max(scores))]

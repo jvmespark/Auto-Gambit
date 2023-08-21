@@ -6,6 +6,7 @@ os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
 import time
 import argparse
+import random
 
 WIDTH = HEIGHT = 500
 DIMENSION = 8
@@ -57,6 +58,8 @@ def playGUI(computer, algo):
     while (running):
             if not gamestate.moveState():
                 move = algo_engine.minMax(gamestate, 3)
+                if move is None:
+                    move = random.choice(gamestate.get_valid_moves())
                 gamestate.make_move(move)
                 moveMade = True
             else:
