@@ -358,7 +358,7 @@ class gamestate():
             #right 2 down 1
 
             #right 1
-            if c + 1 < 7:
+            if c + 1 < 8:
                 if r-2>=0:
                     if self.board[r-2][c+1]=='--' or self.board[r-2][c+1][0]=='b':
                         moves.append(move((r,c),(r-2,c+1),self.board))
@@ -374,7 +374,7 @@ class gamestate():
                     if self.board[r+2][c-1]=='--' or self.board[r-2][c-1][0]=='b':
                         moves.append(move((r,c),(r+2,c-1),self.board))
             #right 2
-            if c + 2 < 7:
+            if c + 2 < 8:
                 if r-1>=0:
                     if self.board[r-1][c+2]=='--' or self.board[r-1][c+2][0]=='b':
                         moves.append(move((r,c),(r-1,c+2),self.board))
@@ -391,7 +391,7 @@ class gamestate():
                         moves.append(move((r,c),(r+1,c-2),self.board))
         if not self.white_move:    
             #right 1
-            if c + 1 < 7:
+            if c + 1 < 8:
                 if r-2 >= 0:
                     if self.board[r-2][c+1]=='--' or self.board[r-2][c+1][0]=='w':
                         moves.append(move((r,c),(r-2,c+1),self.board))
@@ -407,7 +407,7 @@ class gamestate():
                     if self.board[r+2][c-1]=='--' or self.board[r+2][c-1][0]=='w':
                         moves.append(move((r,c),(r+2,c-1),self.board))
             #right 2
-            if c + 2 < 7:
+            if c + 2 < 8:
                 if r-1 >= 0:
                     if self.board[r-1][c+2]=='--' or self.board[r-1][c+2][0]=='w':
                         moves.append(move((r,c),(r-1,c+2),self.board))
