@@ -33,6 +33,7 @@ class gui():
         moveMade = False #until a valid move is made, then you shouldnt regenerate an expensive function like get valid moves
         ai_thinking = False
         move_finder_process = None
+        move_undone = False
 
         #tuple
         square_selected = ()
@@ -103,9 +104,10 @@ class gui():
                                 if ai_thinking:
                                     move_finder_process.terminate()
                                     ai_thinking = False
+                                moveMade = True
                                 move_undone = True
 
-                    if self.computer == "against" and not human_turn:
+                    if self.computer == "against" and not human_turn and not move_undone:
                         if not ai_thinking:
                             ai_thinking = True
                             return_queue = Queue()  # used to pass data between threads
@@ -123,6 +125,7 @@ class gui():
                 if moveMade:
                     valid_moves, checkmate, stalemate = self.gamestate.get_valid_moves()
                     moveMade = False
+                    move_undone = False
 
                 self.load_gamestate(screen, self.gamestate)
                 clock.tick(self.MAX_FPS)
@@ -158,6 +161,7 @@ class gui():
 
 ##############################################################################################################################################################
 
+# NOTE: needs to be update with upgrades i've given to gui. PRIORITY: LOW
 
 class cmd():
     def __init__(self, gamestate, computer, algo):
