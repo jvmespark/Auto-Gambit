@@ -1,19 +1,14 @@
 # Chess Engine
 
 # Features
-- Move validation checking
-- En-Passent and Castling support
-- Checkmate
-- Undo moves
-- Pawn promotions
+- robust chess engine, algorithm engine with nega-alpha-beta-minmax, and dual usage support: terminal and gui  
 
 # Roadmap
 
-- Move Highlighting
-- Timer
-- End Screens
-- Chess AI
-- Online Multiplayer
+- endscreens  
+- further optimizations for speed and memory  
+- neural network chess  
+- tool kits: --logmoves to file, speed and error tests, portability  
 
 # Screenshot
 
