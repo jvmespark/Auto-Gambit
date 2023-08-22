@@ -6,7 +6,11 @@ import os
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
 import time
+import random
+from multiprocessing import Process, Queue
     
+player_one = True # human white
+player_two = False # human black
 
 class gui():
     def __init__(self, gamestate, computer, algo):
@@ -27,7 +31,9 @@ class gui():
         pygame.display.set_caption("Silver Chess")
         self.load_images()
         moveMade = False #until a valid move is made, then you shouldnt regenerate an expensive function like get valid moves
-        
+        ai_thinking = False
+        move_finder_process = None
+
         #tuple
         square_selected = ()
         #array
@@ -40,11 +46,25 @@ class gui():
         running = True
         checkmate, stalemate = False, False
         while (running):
-                if self.computer != "disabled":
-                    move = AI.makeMove(self.gamestate, 3, self.gamestate.white_move)
-                    self.gamestate.make_move(move)
-                    moveMade = True
-                # if autoplay, rewrite minmax scoring to include white
+                if self.computer == "autoplay":
+                    if not ai_thinking:
+                        ai_thinking = True
+                        return_queue = Queue()  # used to pass data between threads
+                        move_finder_process = Process(target=AI.makeMove, args=(self.gamestate, valid_moves, return_queue))
+                        move_finder_process.start()
+
+                    if not move_finder_process.is_alive():
+                        ai_move = return_queue.get()
+                        if ai_move is None:
+                            ai_move = random.choice(valid_moves)
+                        self.gamestate.make_move(ai_move)
+                        moveMade = True
+                        ai_thinking = False
+
+                human_turn = True
+                if self.computer == "against":
+                    human_turn = (self.gamestate.white_move and player_one) or (not self.gamestate.white_move and player_two)
+
                 if self.computer != "autoplay":
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
@@ -63,7 +83,7 @@ class gui():
                             else:
                                 square_selected = (row, column)
                                 player_clicks.append(square_selected)
-                            if len(player_clicks) == 2:
+                            if len(player_clicks) == 2 and human_turn:
                                 move = engine.move(player_clicks[0], player_clicks[1], self.gamestate.board)
                                 print(move.get_chess_notation())
                                 for i in range(len(valid_moves)):
@@ -80,6 +100,25 @@ class gui():
                             if event.key == pygame.K_BACKSPACE or event.key == pygame.K_u:
                                 self.gamestate.undo_move()
                                 valid_moves, checkmate, stalemate = self.gamestate.get_valid_moves()
+                                if ai_thinking:
+                                    move_finder_process.terminate()
+                                    ai_thinking = False
+                                move_undone = True
+
+                    if self.computer == "against" and not human_turn:
+                        if not ai_thinking:
+                            ai_thinking = True
+                            return_queue = Queue()  # used to pass data between threads
+                            move_finder_process = Process(target=AI.makeMove, args=(self.gamestate, valid_moves, return_queue))
+                            move_finder_process.start()
+
+                        if not move_finder_process.is_alive():
+                            ai_move = return_queue.get()
+                            if ai_move is None:
+                                ai_move = random.choice(valid_moves)
+                            self.gamestate.make_move(ai_move)
+                            moveMade = True
+                            ai_thinking = False
 
                 if moveMade:
                     valid_moves, checkmate, stalemate = self.gamestate.get_valid_moves()
