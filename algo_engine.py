@@ -2,11 +2,12 @@
 from copy import deepcopy
 import random
 
-# NOTE: Likely crashing when it calculates a checkmate in 3 and shuts down the program prematurely? working theory
 
-def minMax(gamestate, N):
+# add whiteTurn boolean as parameter
+def minMax(gamestate, N, whiteMove):
     # call at move state only. later look to abstract to classes but for now just build this one function that is called only on its move.
-    blackScoring = {'bp': -1,
+    blackScoring = {
+          'bp': -1,
           'bn': -3,
           'bb': -3,
           'br': -5,
@@ -19,7 +20,23 @@ def minMax(gamestate, N):
           'wq': 9,
           'wk': 0,
           }
-    scoring = blackScoring
+    whiteScoring = {
+          'wp': -1,
+          'wn': -3,
+          'wb': -3,
+          'wr': -5,
+          'wq': -9,
+          'wk': 0,
+          'bp': 1,
+          'bn': 3,
+          'bb': 3,
+          'br': 5,
+          'bq': 9,
+          'bk': 0,
+          }
+    scoring = blackScoring 
+    if whiteMove:
+        scoring = whiteScoring
     def eval_board(gamestate):
         score = 0
         board = gamestate.board
@@ -39,7 +56,7 @@ def minMax(gamestate, N):
         temp = deepcopy(gamestate)              
         temp.make_move(move)
         if N>1:
-            temp_best_move = minMax(temp,N-1)
+            temp_best_move = minMax(temp,N-1, whiteMove)
             if not temp_best_move == None:
                 temp.make_move(temp_best_move)
 
@@ -47,10 +64,30 @@ def minMax(gamestate, N):
 
     #print(N, len(moves), checkmate, stalemate, len(scores), scores)
 
-    if not gamestate.moveState: #black turn
+
+    # this thing is all bugged, not sure why
+    if not gamestate.moveState() and not whiteMove: # black turn checking black perspective
+        best_move = moves[scores.index(max(scores))]
+    if not gamestate.moveState() and whiteMove: # white turn checking black perspective
+        best_move = moves[scores.index(min(scores))]
+    if gamestate.moveState() and not whiteMove: # black turn checking white perspective
+        best_move = moves[scores.index(min(scores))]
+    if gamestate.moveState() and whiteMove: # white turn checking white perspective
         best_move = moves[scores.index(max(scores))]
 
-    else: # white turn
-        best_move = moves[scores.index(min(scores))]
-
     return best_move
+
+
+
+#####################################################################################################################################################
+
+class algo():
+    ALGO_MAP = {'min-max': minMax}
+    AI = ALGO_MAP['min-max']
+    depth = 1
+
+    def __init__(self, algo):
+        self.AI = self.ALGO_MAP[algo]
+
+    def makeMove(self, gamestate, depth, whiteMove):
+        return self.AI(gamestate, depth, whiteMove)
