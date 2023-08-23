@@ -64,14 +64,6 @@ CHECKMATE = 1000
 STALEMATE = 0
 DEPTH = 3
 
-def findBestMove(gamestate, valid_moves, return_queue):
-    global next_move
-    next_move = None
-    random.shuffle(valid_moves)
-    findMoveNegaMaxAlphaBeta(gamestate, valid_moves, DEPTH, -CHECKMATE, CHECKMATE,
-                             1 if gamestate.white_move else -1)
-    return_queue.put(next_move)
-
 def findMoveNegaMaxAlphaBeta(game_state, valid_moves, depth, alpha, beta, turn_multiplier):
     global next_move
     if depth == 0:
@@ -119,9 +111,13 @@ def scoreBoard(game_state):
 
     return score
 
-# add whiteTurn boolean as parameter
 def minMax(gamestate, valid_moves, return_queue):
-    findBestMove(gamestate, valid_moves, return_queue)
+    global next_move
+    next_move = None
+    random.shuffle(valid_moves)
+    findMoveNegaMaxAlphaBeta(gamestate, valid_moves, DEPTH, -CHECKMATE, CHECKMATE,
+                             1 if gamestate.white_move else -1)
+    return_queue.put(next_move)
 
 #####################################################################################################################################################
 

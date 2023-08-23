@@ -5,8 +5,11 @@
 
 # Roadmap
 
-- endscreens  
+- castling  
+- opening book database  
 - further optimizations for speed and memory  
+- tool kits: --logmoves to file, speed and error tests, portability, PGN formatting  
+- better argument parsing (play->usage, computer->AI, w b), better documentation and README
 - neural network chess  
-- tool kits: --logmoves to file, speed and error tests, portability  
-- better argument parsing (play->usage, computer->AI), better documentation and README
+- end screen  
+- rewrite algo in c++ if necessary  

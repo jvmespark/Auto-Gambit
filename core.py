@@ -58,6 +58,7 @@ class gui():
                         ai_move = return_queue.get()
                         if ai_move is None:
                             ai_move = random.choice(valid_moves)
+                        print(ai_move.get_chess_notation())
                         self.gamestate.make_move(ai_move)
                         moveMade = True
                         ai_thinking = False
@@ -118,6 +119,7 @@ class gui():
                             ai_move = return_queue.get()
                             if ai_move is None:
                                 ai_move = random.choice(valid_moves)
+                            print(ai_move.get_chess_notation())
                             self.gamestate.make_move(ai_move)
                             moveMade = True
                             ai_thinking = False
@@ -160,6 +162,8 @@ class gui():
 
 
 ##############################################################################################################################################################
+
+
 
 # NOTE: needs to be update with upgrades i've given to gui. PRIORITY: LOW
 
