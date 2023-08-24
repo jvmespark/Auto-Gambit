@@ -1,6 +1,12 @@
 
 from copy import deepcopy
 import random
+from math import inf, log, sqrt, e
+from multiprocessing import Pool
+import sys
+sys.setrecursionlimit(100000)
+
+############# Alpha Beta Pruning Mini Max
 
 piece_score = {"k": 0, "q": 9, "r": 5, "b": 3, "n": 3, "p": 1}
 
@@ -72,7 +78,7 @@ def findMoveNegaMaxAlphaBeta(game_state, valid_moves, depth, alpha, beta, turn_m
     max_score = -CHECKMATE
     for move in valid_moves:
         game_state.make_move(move)
-        next_moves, checkmate, stalemate = game_state.get_valid_moves()
+        next_moves = game_state.get_valid_moves()
         score = -findMoveNegaMaxAlphaBeta(game_state, next_moves, depth - 1, -beta, -alpha, -turn_multiplier)
         if score > max_score:
             max_score = score
@@ -119,10 +125,156 @@ def minMax(gamestate, valid_moves, return_queue):
                              1 if gamestate.white_move else -1)
     return_queue.put(next_move)
 
-#####################################################################################################################################################
+############# Monte Carlo Tree Search
+
+class node():
+    def __init__(self):
+        self.state = None
+        self.action = ''
+        self.children = set()
+        self.parent = None
+        self.N = 0
+        self.n = 0
+        self.v = 0
+
+def ucb1(curr_node):
+    ans = curr_node.v+2*(sqrt(log(curr_node.N+e+(10**-6))/(curr_node.n+(10**-10))))
+    return ans
+
+def rollout(curr_node):
+    valid_moves = curr_node.state.get_valid_moves()
+    if(curr_node.state.game_over() or len(valid_moves)==0):
+        board = curr_node.state
+        if(board.checkmate and board.white_move):
+            return (-1,curr_node)
+        elif(board.checkmate and not board.white_move):
+            return (1,curr_node)
+        else:
+            return (0.5,curr_node)
+    
+    #valid_moves = curr_node.state.get_valid_moves()
+    #print(len(valid_moves))
+    
+    for i in valid_moves:
+        temp = deepcopy(curr_node.state)
+        temp.make_move(i)
+        child = node()
+        child.state = temp
+        child.parent = curr_node
+        curr_node.children.add(child)
+    rnd_state = random.choice(list(curr_node.children))
+
+    return rollout(rnd_state)
+
+def expand(curr_node,white):
+    if(len(curr_node.children)==0):
+        return curr_node
+    max_ucb = -inf
+    if(white):
+        idx = -1
+        max_ucb = -inf
+        sel_child = None
+        for i in curr_node.children:
+            tmp = ucb1(i)
+            if(tmp>max_ucb):
+                idx = i
+                max_ucb = tmp
+                sel_child = i
+
+        return(expand(sel_child,0))
+
+    else:
+        idx = -1
+        min_ucb = inf
+        sel_child = None
+        for i in curr_node.children:
+            tmp = ucb1(i)
+            if(tmp<min_ucb):
+                idx = i
+                min_ucb = tmp
+                sel_child = i
+
+        return expand(sel_child,1)
+
+def rollback(curr_node,reward):
+    curr_node.n+=1
+    curr_node.v+=reward
+    while(curr_node.parent!=None):
+        curr_node.N+=1
+        curr_node = curr_node.parent
+    return curr_node
+
+def monteCarlo(gamestate, valid_moves, return_queue, depth=3):
+    curr_node = node()
+    curr_node.state = gamestate
+    map_state_move = dict()
+    for move in valid_moves:
+       temp = deepcopy(gamestate)
+       temp.make_move(move)
+       child = node()
+       child.state = temp
+       child.parent = curr_node
+       curr_node.children.add(child)
+       map_state_move[child] = move
+    while (depth>0):
+        if gamestate.white_move:
+            idx = -1
+            max_ucb = -inf
+            sel_child = None
+            for i in curr_node.children:
+                tmp = ucb1(i)
+                if tmp>max_ucb:
+                    idx = i
+                    max_ucb = tmp
+                    sel_chil = i
+            ex_child = expand(sel_child, 0)
+            reward, state = rollout(ex_child)
+            curr_node = rollback(state, reward)
+            depth -= 1
+        else:
+            idx = -1
+            min_ucb = inf
+            sel_child = None
+            for i in curr_node.children:
+                tmp = ucb1(i)
+                if(tmp<min_ucb):
+                    idx = i
+                    min_ucb = tmp
+                    sel_child = i
+
+            ex_child = expand(sel_child,1)
+
+            reward,state = rollout(ex_child)
+
+            curr_node = rollback(state,reward)
+            depth-=1
+        if(gamestate.white_move):
+            mx = -inf
+            idx = -1
+            selected_move = random.choice(valid_moves)
+            for i in (curr_node.children):
+                tmp = ucb1(i)
+                if(tmp>mx):
+                    mx = tmp
+                    selected_move = map_state_move[i]
+            return_queue.put(selected_move)
+        else:
+            mn = inf
+            idx = -1
+            selected_move = random.choice(valid_moves)
+            for i in (curr_node.children):
+                tmp = ucb1(i)
+                if(tmp<mn):
+                    mn = tmp
+                    selected_move = map_state_move[i]
+            return_queue.put(selected_move)
+
+
+
+###############################################################################
 
 class algo():
-    ALGO_MAP = {'min-max': minMax}
+    ALGO_MAP = {'min-max': minMax, 'monte-carlo': monteCarlo}
     AI = ALGO_MAP['min-max']
     depth = 1
 

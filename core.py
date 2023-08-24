@@ -24,7 +24,7 @@ class gui():
         self.IMAGES = {}
 
     def play(self):
-        valid_moves, checkmate, stalemate = self.gamestate.get_valid_moves()
+        valid_moves = self.gamestate.get_valid_moves()
         pygame.init()
         screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         clock = pygame.time.Clock()
@@ -45,7 +45,6 @@ class gui():
             AI.depth = 3
         
         running = True
-        checkmate, stalemate = False, False
         while (running):
                 if self.computer == "autoplay":
                     if not ai_thinking:
@@ -101,7 +100,7 @@ class gui():
                         elif event.type == pygame.KEYDOWN:
                             if event.key == pygame.K_BACKSPACE or event.key == pygame.K_u:
                                 self.gamestate.undo_move()
-                                valid_moves, checkmate, stalemate = self.gamestate.get_valid_moves()
+                                valid_moves = self.gamestate.get_valid_moves()
                                 if ai_thinking:
                                     move_finder_process.terminate()
                                     ai_thinking = False
@@ -125,7 +124,7 @@ class gui():
                             ai_thinking = False
 
                 if moveMade:
-                    valid_moves, checkmate, stalemate = self.gamestate.get_valid_moves()
+                    valid_moves = self.gamestate.get_valid_moves()
                     moveMade = False
                     move_undone = False
 
@@ -133,7 +132,7 @@ class gui():
                 clock.tick(self.MAX_FPS)
                 pygame.display.flip()
 
-                if checkmate or stalemate:
+                if self.gamestate.game_over():
                     time.sleep(5) # let the winner bask in their glory for 5 seconds then close game
                     running = False
                     
@@ -174,7 +173,7 @@ class cmd():
         self.algo = algo
     
     def play(self):
-        valid_moves, checkmate, stalemate = self.gamestate.get_valid_moves()
+        valid_moves = self.gamestate.get_valid_moves()
         moveMade = False #until a valid move is made, then you shouldnt regenerate an expensive function like get valid moves
 
         if self.computer != "disabled":
@@ -199,11 +198,11 @@ class cmd():
                         userMove = input(">> ")
                     if userMove == "u":
                         self.gamestate.undo_move()
-                        valid_moves, checkmate, stalemate = self.gamestate.get_valid_moves()
+                        valid_moves = self.gamestate.get_valid_moves()
                     if userMove == "q":
                         exit(0)
 
-                    if self.gamestate.moveState(): # white turn, so player goes
+                    if self.gamestate.white_move: # white turn, so player goes
                         move = engine.move.notated(userMove, self.gamestate.board)
                         for i in range(len(valid_moves)):
                             if move == valid_moves[i]:
@@ -211,11 +210,11 @@ class cmd():
                                 moveMade = True
 
                 if moveMade:
-                    valid_moves, checkmate, stalemate = self.gamestate.get_valid_moves()
+                    valid_moves = self.gamestate.get_valid_moves()
                     moveMade = False
 
                 self.printBoard(self.gamestate.board)
-                if checkmate or stalemate:
+                if self.gamestate.game_over():
                     running = False
 
     def printBoard(self, board):

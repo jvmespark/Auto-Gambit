@@ -52,8 +52,8 @@ class gamestate():
 
         self.white_move = not self.white_move
 
-    def moveState(self):
-        return self.white_move
+    def game_over(self):
+        return self.checkmate or self.stalemate or len(self.get_all_possible_moves())==0
 
     def undo_move(self):
         if len(self.move_log) != 0:
@@ -100,7 +100,7 @@ class gamestate():
                 self.stalemate = False
         
         self.enpassant_coordinates = temp_enpassant
-        return moves, self.checkmate, self.stalemate
+        return moves
 
     def in_check(self):
         if self.white_move:
